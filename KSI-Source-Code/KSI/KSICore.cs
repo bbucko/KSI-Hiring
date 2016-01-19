@@ -22,6 +22,7 @@ namespace KSI
         private static ApplicationLauncherButton KSIButton = null;
         internal bool KSIGuiOn = false;
         internal bool KSITooltip = false;
+		internal String channelName = "";
 
         void Awake()
         {
@@ -118,7 +119,13 @@ namespace KSI
             GUILayout.Label("This is a button for the Kerbal Science Institute: Placement Services.");
             GUILayout.Label("The reason there is an acorn as the logo is it is created by OakTree42.");
             GUILayout.Label("If you do not close this window it may return when you reload the KSC screen.");
-            if (GUILayout.Button("Close this Window", GUILayout.Width(200f)))
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Channel configuration:");
+			channelName = GUILayout.TextField (channelName);
+			GUILayout.EndHorizontal();
+            
+			if (GUILayout.Button("Close this Window", GUILayout.Width(200f)))
                 BTOff();
             GUILayout.EndVertical();
             GUI.EndGroup();

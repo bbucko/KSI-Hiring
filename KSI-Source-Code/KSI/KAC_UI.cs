@@ -40,6 +40,7 @@ namespace KSI
         private float KStupidity = 50;
         private float KCourage = 50;
         private bool KFearless = false;
+		private bool KTwitch = false;
         private int KCareer = 0;
         private string[] KCareerStrings = { "Pilot", "Scientist", "Engineer" };
         private int KLevel = 0;
@@ -57,7 +58,6 @@ namespace KSI
         KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
         private bool hTest = true;
         private bool hasKredits = true;
-
 
         private void Start()
         {
@@ -198,9 +198,13 @@ namespace KSI
                 GUILayout.Label("Stupidity:  " + Math.Truncate(KStupidity));
                 KStupidity = GUILayout.HorizontalSlider(KStupidity, 0, 100);
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Is this Kerbal Fearless?");
-                KFearless = GUILayout.Toggle(KFearless, "Fearless");
-                GUILayout.EndHorizontal();
+
+				GUILayout.BeginVertical ();
+                KFearless = GUILayout.Toggle(KFearless, "Fearless Kerbal?");
+				KTwitch = GUILayout.Toggle(KTwitch, "Kerbal from Twitch");
+				GUILayout.EndVertical ();
+                
+				GUILayout.EndHorizontal();
                 GUILayout.EndVertical();
 
                 // Level selection
@@ -238,15 +242,15 @@ namespace KSI
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
 
-                if (hTest)
-                {
-                    if (GUILayout.Button(hireStatus(), GUILayout.Width(200f)))
-                        kHire();
-                }
-                if (!hTest)
-                {
-                    GUILayout.Button(hireStatus(), GUILayout.Width(200f));
-                }
+				GUI.enabled = hTest;
+				bool bHire = GUILayout.Button (hireStatus (), GUILayout.Width (200f));
+				GUI.enabled = true;
+
+				if (bHire) {
+					Debug.Log ("KSI :: should hire!");
+					kHire ();
+					Debug.Log ("KSI :: hired!");
+				}
 
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
@@ -280,6 +284,7 @@ namespace KSI
         {
 
             string bText = "Hire Applicant";
+			hTest = true;
             if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
             {
                 double kredits = Funding.Instance.Funds;
@@ -287,15 +292,11 @@ namespace KSI
                 {
                     bText = "Not Enough Funds!";
                     hTest = false;
-                }
-                if (HighLogic.CurrentGame.CrewRoster.GetActiveCrewCount() >= GameVariables.Instance.GetActiveCrewLimit(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.AstronautComplex)))
+				}
+				else if (HighLogic.CurrentGame.CrewRoster.GetActiveCrewCount() >= GameVariables.Instance.GetActiveCrewLimit(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.AstronautComplex)))
                 {
                     bText = "Roster is Full!";
                     hTest = false;
-                }
-                else
-                {
-                    hTest = true;
                 }
             }
             return bText;
@@ -320,8 +321,11 @@ namespace KSI
                 HighLogic.CurrentGame.CrewRoster.Remove(newKerb);
                 newKerb = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
                 loopcount++;
-            }
+			}
 
+			if (KTwitch)
+				newKerb.name = "kTwitch";
+			
             Debug.Log("KSI :: KIA MIA Stat is: " + KDead);
             Debug.Log("KSI :: " + newKerb.experienceTrait.TypeName + " " + newKerb.name + " has been created in: " + loopcount.ToString() + " loops.");
             newKerb.rosterStatus = ProtoCrewMember.RosterStatus.Available;
